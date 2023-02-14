@@ -31,16 +31,17 @@ public class CuentaCorriente {
     private String dniTit;
     private String nombreTitular;
     private double saldo;
+    private int contador;
     
     //Getters y Setters
     
 	public String getDniTit() {
 		return dniTit;
-	}
+	}	
 	public void setDniTit(String dniTit) {
 		this.dniTit = dniTit;
 	}
-	public String getNombreTitual() {
+	public String getNombreTitular() {
 		return nombreTitular;
 	}
 	public void setNombreTitular(String nombreTitular) {
@@ -51,11 +52,13 @@ public class CuentaCorriente {
 	}
 	public void setSaldo(double saldo) {
 		this.saldo = saldo;
-	}
-    
+	}		
 	
+	
+	
+	@Override
 	public String toString() {
-		return "CuentaCorriente [dniTit=" + dniTit + ", nombreTitular=" + nombreTitular + ", saldo=" + saldo + "]";
+		return "CuentaCorriente [dni del Titular=" + dniTit + ", nombre del Titular=" + nombreTitular + ", saldo=" + saldo + "]";
 	}
 	public CuentaCorriente() {
 		super();
@@ -63,9 +66,9 @@ public class CuentaCorriente {
 		
 		
 		//Metodos
-	}
+	}	
 	public static CuentaCorriente CrearCuenta() {
-		System.out.println("CREAR CUENTA: ");
+		System.out.println("Crear cuenta: ");
 		Scanner entradaDniTit = new Scanner(System.in);	
 		Scanner entradaNombreTitular = new Scanner(System.in);	
 		String opcionEntradaDniTit;
@@ -83,26 +86,18 @@ public class CuentaCorriente {
 		return cccVacio;
 		
 	}
-
+		
+	//este Metodo devulve una lista de tipo CuentaCorriente, sirve para modificar los datos de saldo, con el cual podremos ingresar dinero
+	//buscara la cuenta atraves del dni una vez encontrada te dara la opcion de ingresar dinero
 	public List<CuentaCorriente> IngresoCuenta(List<CuentaCorriente> bd)  {
 		
 		System.out.println("INGRESAR CUENTA: ");
 		Scanner entradaDni = new Scanner(System.in);
 		System.out.println("Indique dni de cuenta: ");
-		String opcionEntradaDni = entradaDni.next();
-		//buscar la cuenta
-		int contador = 0;
-		boolean esEncontrado = false;
-		for(CuentaCorriente cuenta: bd) {			
-			String dniBd = cuenta.getDniTit();
-			if(dniBd.equals(opcionEntradaDni)) {
-				esEncontrado = true;
-				break;
-			}
-			contador++;			
-		}		
+		String buscaDniTit = entradaDni.next();
+		//buscar la cuenta	
 
-		if(esEncontrado) {
+		if(BuscaCuenta(buscaDniTit,bd)) {
 			System.out.println("Indique saldo a ingresar: ");
 			Scanner entradaIngreso = new Scanner(System.in);
 			double ingreso = entradaIngreso.nextDouble();
@@ -110,18 +105,14 @@ public class CuentaCorriente {
 			bd.get(contador).setSaldo(saldoActual+ingreso);
 			double saldoNuevo = saldoActual+ingreso;
 			System.out.println("Saldo anterior: "+saldoActual+"Saldo nuevo: "+ingreso);
-		}else {
-			System.out.println("No existe cuenta para el dni indicaco: "+opcionEntradaDni);
 			return bd;
 		}
-		return bd;
+		//en caso de error al buscar la cuenta saldra este mensaje avisandono de que la cuenta esta mal o no exite
+		else System.err.println("No existe cuenta para el dni indicaco: "+buscaDniTit);
+			return bd;		
 	}
-	
-
-	public static ArrayList<CuentaCorriente> MostrarCuentaUsuario(String dniUsuario) {
-		
-		return null;
-	}
+	//este Metodo devulve una lista de tipo CuentaCorriente, sirve para modificar los datos de saldo, con el cual podremos sacar dinero
+	//buscara la cuenta atraves del dni una vez encontrada te dara la opcion de ingresar dinero
 	public List<CuentaCorriente> SacarCuenta(List<CuentaCorriente> bd){
 		
 		//buscamos la cuenta primero
@@ -130,20 +121,11 @@ public class CuentaCorriente {
 		//para ello pedimos el dni
 		Scanner entradaDni = new Scanner(System.in);
 		System.out.println("Indique dni de cuenta: ");
-		String opcionEntradaDni = entradaDni.next();
-		//al introdudcir con este bucle busca la cuenta comprobando el dni sino esta craria la cuenta 
-		int contador = 0;
-		boolean esEncontrado = false;
-		for(CuentaCorriente cuenta: bd) {			
-			String dniBd = cuenta.getDniTit();
-			if(dniBd.equals(opcionEntradaDni)) {
-				esEncontrado = true;
-				break;
-			}
-			contador++;			
-		}		
+		String buscaDniTit = entradaDni.next();
+		//al introdudcir con este bucle busca la cuenta comprobando el dni 
+				
 		// aqui ya decimos cuanto saldo queremos sacar mira y resta lo que decidimo sacar
-		if(esEncontrado) {
+		if(BuscaCuenta(buscaDniTit,bd)) {
 			System.out.println("Indique saldo a sacar: ");
 			Scanner entradaSacar = new Scanner(System.in);
 			double sacar = entradaSacar.nextDouble();
@@ -151,14 +133,55 @@ public class CuentaCorriente {
 			bd.get(contador).setSaldo(saldoActual-sacar);
 			double saldoNuevo = saldoActual-sacar;
 			System.out.println("Saldo anterior: "+saldoActual+"Saldo nuevo: "+sacar);
-		}else {
-			System.out.println("No existe cuenta para el dni indicaco: "+opcionEntradaDni);
+		}
+		//en caso de error al buscar la cuenta saldra este mensaje avisandono de que la cuenta esta mal o no exite
+		else {
+			System.err.println("No existe cuenta para el dni indicaco: "+buscaDniTit);
 			return bd;
 		}
 		return bd;
 	}
+	//este metodo devolvera una lista de tip CuentaCorriente en la cual se veran reflejados los datos de la cuenta que deseamos ver 
+	// buscara los datos de la cuenta atraves del dni como hemos dicho en las anterires veces
+	public String MostrarCuenta(List<CuentaCorriente> bd){
+		String datos="";
+		Scanner encontrarDNI=new Scanner(System.in);
+		System.out.println("Introduzca su dni: ");
+		String buscaDNI=encontrarDNI.next();
+		//si busca cuenta si existe mostrara los datos dni nombre y saldo		
+		if(BuscaCuenta(buscaDNI,bd)) {
+			String dniTit=bd.get(contador).getDniTit();
+			String nombreTitular=bd.get(contador).getNombreTitular();
+			double saldo=bd.get(contador).getSaldo();
+			datos=("Numero dni del titular: "+dniTit+"; Nombre del Titular: "+nombreTitular+"; Saldo de la cuenta: "+saldo);	 
+		}
+		//si no encuentra la cuenta dara error
+		else System.err.println("No se ha encontrado la cuenta.");
+		return datos;
 	}
-	
+		//este metodo es el que utilizaramos todo el tiempo para buscar la cuenta utilizando el dni como referencia
+		
+		private boolean BuscaCuenta (String DNI,List<CuentaCorriente> bd) {
+			//se declara un contador a 0
+			 contador=0;
+			//recorro la lista en busca del dni que sea igual en ella.
+			for (int i = 0; i < bd.size(); i++) {
+				//Que significa la siguiente linea:
+				//1.De la lista va buscando cada cuenta y de cada cuenta el dni y lo guarda en una variable.
+				String nuevoDNI=bd.get(i).getDniTit();
+				//2.Si el DNI que se ha guardado es igual al que se ha introducido devuelve true
+				//Se usa el equals poque con == no funciona bien con strings.
+				if(nuevoDNI.equals(DNI)) 
+					return true;
+				
+				//Aumenta el contador cada vuelta hasta que se de true.
+				contador++;
+			}
+			return false;
+		}	
+
+}
+
 	
 
 	
